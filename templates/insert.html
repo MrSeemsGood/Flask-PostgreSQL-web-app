@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+   <body>
+      <h2>Вставить строку с данными: </h2>
+      <form action="http://localhost:5000/insertresult" method="POST">
+         <p>
+            <datalist id="citypopulations">
+               <option value="between 100,000 and 1 million"> </option>
+               <option value="less than 100,000"> </option>
+               <option value="more than 1 million"> </option>
+            </datalist>
+            <br>City population: <input list="citypopulations" id="citypopulations" name="CityPopulation" /> </br>
+            <br>Employment field: <input type="text" name="EmploymentField" /> </br>
+            <br>Employment status: <input type="text" name="EmploymentStatus" /> </br>
+            <datalist id="genders">
+               <option value="male"> </option>
+               <option value="female"> </option>
+            </datalist>
+            <br>Gender: <input list="genders" id="genders" name="Gender" /> </br>
+            <datalist id="debts">
+               <option value="0"> </option>
+               <option value="1"> </option>
+            </datalist>
+            <br>Has debt: <input list="debts" id="debts" name="HasDebt" /> </br>
+            <br>Income: <input type="text" name="Income" /> </br>
+            <br>Job preference: <input type="text" name="JobPref" /> </br>
+            <br>Job location preference: <input type="text" name="JobWherePref" /> </br>
+            <br>Language at home: <input type="text" name="LanguageAtHome" /> </br>
+            <datalist id="maritalstatuses">
+               <option value="married or domestic parthnership"> </option>
+               <option value="single, never married"> </option>
+               <option value="separated"> </option>
+               <option value="divorced"> </option>
+               <option value="widowed"> </option>
+            </datalist>
+            <br>Marital status: <input list="maritalstatuses" id="maritalstatuses" name="MaritalStatus" /> </br>
+            <br>School degree: <input type="text" name="SchoolDegree" /> </br>
+            <br> <input type="submit" value="Внести" /> </br>
+         <p>
+      </form>
+
+      <form action = "http://localhost:5000/login">
+        <p> <input type = "submit" value = "Назад на главную" /> </p>
+     </form>
+   </body>
+</html>

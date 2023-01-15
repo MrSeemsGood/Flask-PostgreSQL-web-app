@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+   <body>
+      <h2>Результаты теста</h2>
+      <br>Используемые столбцы: {{ field1 }} (по горизонтали) и {{ field2 }} (по вертикали)</br>
+
+      <h3>Таблица частот:</h3>
+      <table border=1>
+         {% for row in link_t %}
+            <tr>
+               {% for cell in row %}
+                  <td> {{ cell }} </td>
+               {% endfor %}
+            </tr>
+         {% endfor %}
+      </table>
+
+      <h3>Таблица ожидаемых частот</h3>
+      <table border=1>
+         {% for row in exp %}
+            <tr>
+               {% for cell in row %}
+                  <td> {{ cell }} </td>
+               {% endfor %}
+            </tr>
+         {% endfor %}
+      </table>
+
+      <h3>Тесты</h3>
+      <p>
+         <br>Способ тестирования: {{ method }}</br> 
+         <br>Результаты:</br>
+         <br>F-statistic = {{ fstat }}</br>
+         <br>p-value = {{ p }}</br>
+         <br>{{ itr }}</br>
+      </p>
+
+      <form action = "http://localhost:5000/login">
+        <p> <input type = "submit" value = "Назад на главную" /> </p>
+     </form>
+   </body>
+</html>

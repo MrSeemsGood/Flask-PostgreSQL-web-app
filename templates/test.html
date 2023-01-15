@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+   <body>
+      <h2> Просмотреть результаты теста: </h2>
+      <form method="POST">
+         <p>
+            <datalist id="columns">
+               {% for c in columnsList: %}
+                  <option value={{ c }}> </option>
+               {% endfor %}
+            </datalist>
+            <br>Название первого столбца (зависимая переменная): <input list="columns" id="columns" name="column1" /> </br>
+            <br>Название второго столбца (независимая переменная): <input list="columns" id="columns" name="column2" /> </br>
+            <br> <input formaction="http://localhost:5000/testresult" type="submit" value="Корреляционные тесты" /> </br>
+            <br> <input formaction="http://localhost:5000/anovatestresult" type="submit" value="ANOVA, тесты на нормальность" /> </br>
+         </p>
+      </form>
+
+      <form action = "http://localhost:5000/login">
+         <p> <input type = "submit" value = "Назад на главную" /> </p>
+      </form>
+   </body>
+</html>

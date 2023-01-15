@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+   <body>
+      <p>Новая строка внесена в dataframe: </p>
+      <table border="1" cellpadding="3">
+         {% for key, value in result.items() %}
+            <tr>
+                <th> {{ key }} </th>
+                <td> {{ value }} </td>
+            </tr>
+         {% endfor %}
+      </table>
+      <p>Новый объём: {{ new_len }} </p>
+
+      <form action = "http://localhost:5000/login">
+         <p> <input type = "submit" value = "Назад на главную" /> </p>
+      </form>
+   </body>
+</html>
