@@ -86,5 +86,4 @@ def anovaTestResult():
 
 if __name__ == '__main__':
    print('Запуск сервера...')
-   print('тест коммит')
    app.run(debug=True)
