@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as pypl
-import rpy2.robjects.numpy2ri
+#import rpy2.robjects.numpy2ri
 #from rpy2.robjects.packages import importr
 #rpy2.robjects.numpy2ri.activate()
 #r_stats = importr('stats')

@@ -37,6 +37,7 @@ def insertResult():
       result = dict(request.args)
 
    app.data = pd.concat((app.data, pd.DataFrame(result, index=[0])))
+   app.data.to_excel(excel_writer="2016-FCC-New-Coders-Survey-Data.xlsx", index=False)
    return render_template('insertresult.html', result=result, new_len=app.data.shape[0])
 
 @app.route('/testresult', methods=['POST'])
@@ -85,5 +86,4 @@ def anovaTestResult():
    )
 
 if __name__ == '__main__':
-   print('Запуск сервера...')
    app.run(debug=True)
