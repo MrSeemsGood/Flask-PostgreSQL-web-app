@@ -1,22 +1,32 @@
 <!doctype html>
 <html>
+   <head>
+      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/mainstyle.css') }}">
+   </head>
    <body>
-      <h2> Просмотреть результаты теста: </h2>
+      <h1>Просмотр результатов тестов</h1>
       <form method="POST">
          <p>
-            <datalist id="columns">
+            <label for="column1">Название первого столбца (зависимая переменная):</label>
+            <select id="column1" name="column1">
                {% for c in columnsList: %}
-                  <option value={{ c }}> </option>
+                  <option value={{ c }}>{{ c }}</option>
                {% endfor %}
-            </datalist>
-            <br>Название первого столбца (зависимая переменная): <input list="columns" id="columns" name="column1" /> </br>
-            <br>Название второго столбца (независимая переменная): <input list="columns" id="columns" name="column2" /> </br>
-            <br> <input formaction="http://localhost:5000/testresult" type="submit" value="Корреляционные тесты" /> </br>
-            <br> <input formaction="http://localhost:5000/anovatestresult" type="submit" value="ANOVA, тесты на нормальность" /> </br>
+            </select><br>
+
+            <label for="column2">Название первого столбца (независимая переменная):</label>
+            <select id="column2" name="column2">
+               {% for c in columnsList: %}
+                  <option value={{ c }}>{{ c }}</option>
+               {% endfor %}
+            </select><br>
+
+            <input formaction="http://localhost:2000/testresult" type="submit" value="Корреляционные тесты" />
+            <input formaction="http://localhost:2000/anovatestresult" type="submit" value="ANOVA, тесты на нормальность" />
          </p>
       </form>
 
-      <form action = "http://localhost:5000/login">
+      <form action = "http://localhost:2000/login">
          <p> <input type = "submit" value = "Назад на главную" /> </p>
       </form>
    </body>

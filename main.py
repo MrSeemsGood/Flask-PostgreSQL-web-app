@@ -1,25 +1,29 @@
 from flask import Flask, redirect, url_for, request, render_template
 from mystat import *
+import os
 
 class MyApp(Flask):
    def __init__(self, name, data):
       super().__init__(name)
-      # загрузка данных
       self.data = data
       self.tables = ()
       self.method = ""
-      self.corrTest = None
+      self.corr_test = None
       self.normality = False
       self.anova = None
 
 app = MyApp(__name__, data=load_data())
+
+@app.route('/')
+def redirectToLogin():
+   return redirect(url_for('login'))
 
 # POST and GET are HTTP mehods.
 # GET - Sends data in unencrypted form to the server. Most common method.
 # POST - Used to send HTML form data to server. Data received by POST method is not cached by server.
 @app.route('/login')
 def login():
-   return render_template('login.html')
+   return render_template('login.html', table=app.data.head().to_dict(orient='list'))
 
 @app.route('/insert')
 def insertValues():
@@ -37,8 +41,9 @@ def insertResult():
       result = dict(request.args)
 
    app.data = pd.concat((app.data, pd.DataFrame(result, index=[0])))
-   app.data.to_excel(excel_writer="2016-FCC-New-Coders-Survey-Data.xlsx", index=False)
-   return render_template('insertresult.html', result=result, new_len=app.data.shape[0])
+   result_db = ','.join(["'" + str(item) + "'" for item in tuple(result.values())])
+   connect_execute_db('INSERT INTO flaskdb VALUES (' + result_db + ')')
+   return render_template('insertresult.html', result=result)
 
 @app.route('/testresult', methods=['POST'])
 def testResult():
@@ -48,7 +53,7 @@ def testResult():
    try:
       app.tables = create_tables(app.data, fields[0], fields[1])
       app.method = choose_method(app.data, fields[0], fields[1])
-      app.corrTest = perform_test(
+      app.corr_test = perform_test(
          pd.crosstab(app.data[fields[0]], app.data[fields[1]], margins=True),
          app.method
       )
@@ -56,15 +61,14 @@ def testResult():
       return render_template('errorpage.html')
    
    return render_template(
-         'testresult.html', 
-         field1=fields[0], 
-         field2=fields[1], 
-         link_t=app.tables[0], 
-         exp=app.tables[1],
+         'testresult.html',
+         fields=fields,
+         linkage = app.tables['linkage'],
+         expected=app.tables['expected'],
          method=app.method,
-         fstat = app.corrTest[0],
-         p = app.corrTest[1],
-         itr = app.corrTest[2]
+         F=app.corr_test['F'],
+         p=app.corr_test['p'],
+         result=app.corr_test['result']
       )
 
 @app.route('/anovatestresult', methods=['POST'])
@@ -73,17 +77,16 @@ def anovaTestResult():
 
    try:
       app.normality = check_normality(app.data[fields[0]])
-      app.anova = anova(app.data, fields[0], fields[1])
+      app.anova = do_anova(app.data, fields[0], fields[1])
    except:
       return render_template('errorpage.html')
       
    return render_template(
       'anovatestresult.html',
-      field1=fields[0], 
-      field2=fields[1],
+      fields=fields,
       normality = app.normality,
       anova = app.anova
    )
 
 if __name__ == '__main__':
-   app.run(debug=True)
+   app.run(debug=True, port=2000)

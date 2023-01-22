@@ -1,57 +1,85 @@
 <!doctype html>
 <html>
+   <head>
+      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/mainstyle.css') }}">
+   </head>
    <body>
-      <h2>Вставить строку с данными:</h2>
-      <form action="http://localhost:5000/insertresult" method="POST">
-         <p>
-            <label for="citypopulations">City population:</label>
-            <select id="citypopulations" name="CityPopulation">
-               <option value="between 100,000 and 1 million">Between 100,000 and 1,000,000</option>
-               <option value="less than 100,000">Less than 100,000</option>
-               <option value="more than 1 million">More than 1,000,000</option>
-            </select><br>
+      <h1>Внести данные</h1>
 
-            <br>Employment field: <input type="text" name="EmploymentField" value="NA"/></br>
-
-            <br>Employment status: <input type="text" name="EmploymentStatus" value="NA"/></br>
-
-            <br><label for="genders">Gender:</label>
-            <select id="genders" name="Gender">
-               <option value="male">Male</option>
-               <option value="female">Female</option>
-            </select></br>
-
-            <br><label for="debts">Debts:</label>
-            <select id="debts" name="HasDebt">
-               <option value="0">No debts</option>
-               <option value="1">Has debts</option>
-            </select></br>
-
-            <br>Income: <input type="text" name="Income" value="NA"/></br>
-
-            <br>Job preference: <input type="text" name="JobPref" value="NA"/></br>
-
-            <br>Job location preference: <input type="text" name="JobWherePref" value="NA"/></br>
-
-            <br>Language at home: <input type="text" name="LanguageAtHome" value="NA"/></br>
-
-            <br><label for="maritalstatuses">Marital status:</label>
-            <select id="maritalstatuses" name="MaritalStatus">
-               <option value="married or domestic partnership">Married (or domestic partnership)</option>
-               <option value="single, never married">Single (never married)</option>
-               <option value="separated">Separated</option>
-               <option value="divorced">Divorced</option>
-               <option value="widowed">Widowed</option>
-            </select></br>
-
-            <br>School degree: <input type="text" name="SchoolDegree" value="NA"/></br>
-
-            <br> <input type="submit" value="Внести"/></br>
-         <p>
+      <form action="http://localhost:2000/insertresult" method="POST">
+         <table border="1">
+            <tr>
+               <td>
+                  <label for="citypopulations">City population:</label>
+                  <select id="citypopulations" name="CityPopulation">
+                     <option value="between 100,000 and 1 million">Between 100,000 and 1,000,000</option>
+                     <option value="less than 100,000">Less than 100,000</option>
+                     <option value="more than 1 million">More than 1,000,000</option>
+                  </select>
+               </td>
+               <td>
+                  Employment field: <input type="text" name="EmploymentField" value="NA"/>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  Employment status: <input type="text" name="EmploymentStatus" value="NA"/>
+               </td>
+               <td>
+                  <label for="genders">Gender:</label>
+                  <select id="genders" name="Gender">
+                     <option value="male">Male</option>
+                     <option value="female">Female</option>
+                  </select>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <label for="debts">Debts:</label>
+                  <select id="debts" name="HasDebt">
+                     <option value="0">No debts</option>
+                     <option value="1">Has debts</option>
+                  </select>
+               </td>
+               <td>
+                  Income: <input type="text" name="Income" value="0"/>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  Job preference: <input type="text" name="JobPref" value="NA"/>
+               </td>
+               <td>
+                  Job location preference: <input type="text" name="JobWherePref" value="NA"/>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  Language at home: <input type="text" name="LanguageAtHome" value="NA"/>
+               </td>
+               <td>
+                  <label for="maritalstatuses">Marital status:</label>
+                  <select id="maritalstatuses" name="MaritalStatus">
+                     <option value="married or domestic partnership">Married (or domestic partnership)</option>
+                     <option value="single, never married">Single (never married)</option>
+                     <option value="separated">Separated</option>
+                     <option value="divorced">Divorced</option>
+                     <option value="widowed">Widowed</option>
+                  </select>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  School degree: <input type="text" name="SchoolDegree" value="NA"/>
+               </td>
+            </tr>
+         </table>
+         
+         <input type="submit" value="Внести"/>
       </form>
 
-      <form action = "http://localhost:5000/login">
-        <p> <input type = "submit" value = "Назад на главную" /> </p>
-     </form>
+      <form action = "http://localhost:2000/login">
+        <input type = "submit" value = "Назад на главную" />
+      </form>
    </body>
 </html>

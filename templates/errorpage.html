@@ -1,9 +1,13 @@
 <!doctype html>
 <html>
+   <head>
+      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/mainstyle.css') }}">
+   </head>
    <body>
-      <h1> ПРОИЗОШЛА НЕПРЕДВИДЕННАЯ ОШИБКА!!! </h1>
+      <h1>ОШИБКА</h1>
+      <p>Что-то пошло не так! Попробуйте выполнить действие ещё раз!</p>
 
-      <form action = "http://localhost:5000/login">
+      <form action = "http://localhost:2000/login">
         <p> <input type = "submit" value = "Назад на главную" /> </p>
      </form>
    </body>

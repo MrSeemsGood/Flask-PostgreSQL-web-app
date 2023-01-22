@@ -1,7 +1,11 @@
 <!doctype html>
 <html>
+   <head>
+      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/mainstyle.css') }}">
+   </head>
    <body>
-      <p>Новая строка внесена в dataframe: </p>
+      <h1>Результаты вставки</h1>
+      <p>Новая строка успешно внесена в DataFrame: </p>
       <table border="1" cellpadding="3">
          {% for key, value in result.items() %}
             <tr>
@@ -10,10 +14,10 @@
             </tr>
          {% endfor %}
       </table>
-      <p>Новый объём: {{ new_len }} </p>
 
-      <form action = "http://localhost:5000/login">
-         <p> <input type = "submit" value = "Назад на главную" /> </p>
+      <form>
+         <input type="submit" value="Назад" formaction="http://localhost:2000/insert" />
+         <input type="submit" value="На главную" formaction="http://localhost:2000/login" />
       </form>
    </body>
 </html>

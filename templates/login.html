@@ -1,16 +1,32 @@
 <!doctype html>
 <html>
    <head>
-      <link rel="stylesheet" href="css/login.css">
+      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/mainstyle.css') }}">
    </head>
    <body>
       <h1>Главная страница</h1>
-      <form action = "http://localhost:5000/insert">
-         <p><input type = "submit" value = "Вставить новые значения в dataframe" /></p>
+      <p>Flask-сервер для работы с данными опроса начинающих "кодеров". Данные находятся в БД PostgreSQL. Для анализа используются модули pandas, scipy, statsmodels.</p>
+      <table>
+         <tr>
+            {% for k in table.keys() %}
+            <th> {{ k }} </th>
+            {% endfor %}
+         </tr>
+         {% for i in range(5) %}
+            <tr class="hoverable">
+               {% for v in table.values() %}
+               <td> {{ v[i] }} </td>
+               {% endfor %}
+            </tr>
+         {% endfor %}
+      </table>
+
+      <form action = "http://localhost:2000/insert">
+         <input type = "submit" value = "Вставить новые значения в DataFrame" />
       </form>
 
-      <form action = "http://localhost:5000/test">
-         <p><input type = "submit" value = "Тесты" /></p>
+      <form action = "http://localhost:2000/test">
+         <input type = "submit" value = "Тесты" />
       </form>
    </body>
 </html>

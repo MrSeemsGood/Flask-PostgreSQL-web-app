@@ -1,12 +1,21 @@
 <!doctype html>
 <html>
+   <head>
+      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/mainstyle.css') }}">
+   </head>
    <body>
-      <h2>Результаты теста</h2>
-      <br>Используемые столбцы: {{ field1 }} (по горизонтали) и {{ field2 }} (по вертикали)</br>
+      <h1>Результаты теста</h1>
+      <p>Используемые столбцы: {{ fields[0] }} (по горизонтали) и {{ fields[1] }} (по вертикали)</p>
 
-      <h3>Таблица частот:</h3>
+      <h2>Таблица частот:</h2>
+      <div style="overflow-x:auto;">
       <table border=1>
-         {% for row in link_t %}
+         <tr>
+            {% for cell in linkage[0] %}
+               <th> {{ cell }} </th>
+            {% endfor %}
+         </tr>
+         {% for row in linkage[1:] %}
             <tr>
                {% for cell in row %}
                   <td> {{ cell }} </td>
@@ -14,10 +23,17 @@
             </tr>
          {% endfor %}
       </table>
+      </div>
 
-      <h3>Таблица ожидаемых частот</h3>
+      <h2>Таблица ожидаемых частот</h2>
+      <div style="overflow-x:auto;">
       <table border=1>
-         {% for row in exp %}
+         <tr>
+            {% for cell in expected[0] %}
+               <th> {{ cell }} </th>
+            {% endfor %}
+         </tr>
+         {% for row in expected[1:] %}
             <tr>
                {% for cell in row %}
                   <td> {{ cell }} </td>
@@ -25,18 +41,20 @@
             </tr>
          {% endfor %}
       </table>
+      </div>
 
-      <h3>Тесты</h3>
+      <h2>Тесты</h2>
       <p>
-         <br>Способ тестирования: {{ method }}</br> 
-         <br>Результаты:</br>
-         <br>F-statistic = {{ fstat }}</br>
-         <br>p-value = {{ p }}</br>
-         <br>{{ itr }}</br>
+         Способ тестирования: {{ method }}<br> 
+         Результаты:<br>
+         F-статистика={{ F }}<br>
+         p-value={{ p }}<br>
+         {{ result }}<br>
       </p>
 
-      <form action = "http://localhost:5000/login">
-        <p> <input type = "submit" value = "Назад на главную" /> </p>
-     </form>
+      <form>
+         <input type="submit" value="Назад" formaction="http://localhost:2000/test" />
+         <input type="submit" value="На главную" formaction="http://localhost:2000/login" />
+      </form>
    </body>
 </html>

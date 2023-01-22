@@ -1,42 +1,55 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as pypl
-#import rpy2.robjects.numpy2ri
-#from rpy2.robjects.packages import importr
-#rpy2.robjects.numpy2ri.activate()
-#r_stats = importr('stats')
+import psycopg2
 
 from statsmodels.formula.api import ols
 from statsmodels.stats.stattools import durbin_watson
 
 from scipy.stats import (
-        contingency,    # contingency.expected_freq
-        chi2_contingency,   
-        fisher_exact,
-        f_oneway,       # ANOVA
-        levene,         # гетероскедастичность чееек
-        shapiro
+    contingency,    # contingency.expected_freq
+    chi2_contingency,   
+    fisher_exact,
+    f_oneway,       # ANOVA
+    levene,         # гетероскедастичность чееек
+    shapiro
 )
 
+# подсоединиться к PostgreSQL и выполнить запрос (строковый)
+def connect_execute_db(request : str):
+    connection = psycopg2.connect(
+        host='localhost',
+        port=5432,
+        database='flaskdb',
+        user='postgres',
+        password='postgredb1'
+    )
+    
+    cursor = connection.cursor()
+
+    result = None
+    request = request.lower()
+    cursor.execute(request)
+    connection.commit()
+    try:
+        result = pd.DataFrame(cursor.fetchall())
+    except psycopg2.ProgrammingError:
+        pass
+    
+    cursor.close()
+    connection.close()
+
+    return result
+
 def load_data() -> pd.DataFrame:
-    print('Загружаем данные...')
-    coders_data_big = pd.read_excel(io="2016-FCC-New-Coders-Survey-Data.xlsx", sheet_name=0)
+    coders_data = connect_execute_db('SELECT * FROM flaskdb')
 
     columns = [
-            'EmploymentField', 'EmploymentStatus', 'Gender', 'LanguageAtHome', 
-            'JobWherePref', 'SchoolDegree', 'Income',
-            'CityPopulation', 'HasDebt', 'JobPref', 'MaritalStatus'
-            ]
+        'CityPopulation', 'EmploymentField', 'EmploymentStatus', 'Gender', 'HasDebt', 'Income', 
+        'JobPref', 'JobWherePref', 'LanguageAtHome', 'MaritalStatus', 'SchoolDegree'
+    ]
     
-    coders_data = coders_data_big[columns]
-
-    for c in columns:
-        coders_data = coders_data[coders_data[c].notna()]
-    coders_data = coders_data[coders_data['Gender'].isin(('male', 'female'))]
-
-    # стандартизируем колонку Income
-    #coders_data['Income'] = (coders_data['Income'] - coders_data['Income'].mean()) / coders_data['Income'].std()
-    print('Успешно')
+    coders_data.columns = columns
 
     return coders_data
 
@@ -48,18 +61,21 @@ def add_labels(arr : np.ndarray, c, r):
 
 def create_tables(data : pd.DataFrame, field1 : str, field2 : str):
     columns = data[field1].unique().astype(str).tolist() + ["ALL"]
-    rows = [field1 + field2] + data[field2].unique().astype(str).tolist() + ["ALL"]
-    link_table = pd.crosstab(data[field1], data[field2], margins=True)
-    exp = np.transpose(np.round(contingency.expected_freq(link_table), 2))
+    rows = data[field2].unique().astype(str).tolist() + ["ALL"]
+    link_table = pd.crosstab(data[field1], data[field2], margins=True).to_numpy()
+    exp = np.round(contingency.expected_freq(link_table), 2)
 
-    # представление таблицы link_table в виде двумерной матрицы из значений (для отображения в HTML)
-    lt = np.transpose(link_table.to_numpy())
-    lt = add_labels(lt, columns, rows)
+    #перевернуть таблицу так, чтобы по ширине было меньше столбцов, чем по высоте
+    if link_table.shape[0] < link_table.shape[1]:
+        link_table = np.transpose(link_table)
+        exp = np.transpose(exp)
+        link_table = add_labels(link_table, columns, [""] + rows)
+        exp = add_labels(exp, columns, [""] + rows)
+    else:
+        link_table = add_labels(link_table, rows, [""] + columns)
+        exp = add_labels(exp, rows, [""] + columns)
 
-    exp = add_labels(exp, columns, rows)
-    #print(lt)
-
-    return (lt, exp)
+    return {'linkage' : link_table, 'expected' : exp}
 
 def choose_method(data : pd.DataFrame, field1 : str, field2 : str):
     '''
@@ -102,8 +118,6 @@ def choose_method(data : pd.DataFrame, field1 : str, field2 : str):
 
 def perform_test(cross_table : pd.DataFrame, method):
     # тест Фишера не работает для таблиц сопряженнности шире чем 2х2
-    # тест Фишера из R не подключается
-    # кринж, что тут сказать
         #return fisher_exact(cross_table)
         #return r_stats.fisher_test(np.array(cross_table.values()))
     
@@ -113,12 +127,11 @@ def perform_test(cross_table : pd.DataFrame, method):
         test = chi2_contingency(cross_table, correction=True)
 
     fstat, p = test[0], test[1]
+    res = "p-value < 0.05, столбцы независимые (значения одной выборки равномерно распределены среди значений другой выборки)"
     if p > 0.05:
-        itr = "p-value > 0.05, столбцы зависимые (значения одной выборки неравномерно распределены среди значений другой выборки)"
-    else:
-        itr = "p-value < 0.05, столбцы независимые (значения одной выборки равномерно распределены среди значений другой выборки)"
+        res = "p-value > 0.05, столбцы зависимые (значения одной выборки неравномерно распределены среди значений другой выборки)"        
     
-    return (fstat, p, itr)
+    return {'F' : fstat, 'p' : p, 'result' : res}
 
 def check_normality(column : pd.Series):
     # проверяем по тесту Шапиро-Уилка нормальность обычной выборки
@@ -144,7 +157,7 @@ def check_normality(column : pd.Series):
     # если никакой из вариантов не прошёл, значит, выборка не принадлежит нормальному распределению
         return (shapiro_p, shapiro_log_p, shapiro_cut_p, False)
 
-def anova(data : pd.DataFrame, field1 : str, field2 : str):
+def do_anova(data : pd.DataFrame, field1 : str, field2 : str):
     norm = check_normality(data[field1])
     if len(norm) == 2:
         data[field1] = data[field1].apply(lambda x : np.log(x + 1))
@@ -169,9 +182,9 @@ def anova(data : pd.DataFrame, field1 : str, field2 : str):
     str_table_ = str_table_.replace(' (JB)', '')
     list_table_ = str_table_.split()
 
-    additional_summary = [list_table_[:4], list_table_[4:8], list_table_[8:12], list_table_[12:]]
+    add = [list_table_[:4], list_table_[4:8], list_table_[8:12], list_table_[12:]]
 
-    return (f_anova, hsk, dw, additional_summary)
+    return {'ANOVA F' : f_anova, 'heteroskedasticity' : hsk, 'D-W' : dw, 'additional summary' : add}
 
     
 

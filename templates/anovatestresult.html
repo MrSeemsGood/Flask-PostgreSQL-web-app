@@ -1,56 +1,59 @@
 <!doctype html>
 <html>
+   <head>
+      <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static', filename='styles/mainstyle.css') }}">
+   </head>
    <body>
-      <h2>ANOVA и тесты на нормальность:</h2>
-      <br>Используемые столбцы: {{ field1 }} и {{ field2 }} </br>
+      <h1>ANOVA и тесты на нормальность</h1>
+      <p>Используемые столбцы: {{ fields[0] }} и {{ fields[1] }} </p>
 
-      <h2> Testing </h2>
+      <h2>Тесты</h2>
       <p>
-         <br>Тест на нормальность (тест Шапиро) для {{ field1 }}: </br>
+         Тест на нормальность (тест Шапиро) для {{ fields[0] }}:<br>
          {% if normality|length == 1: %}
-            <br> {{field1}} распределена нормально, p = {{ normality[0] }} </br>
+             {{fields[0]}} распределена нормально, p = {{ normality[0] }}<br>
          {% elif normality|length == 2: %}
-            <br> {{field1}} не распределена нормально, p = {{ normality[0] }} </br>
-            <br> {{field1}} распределена нормально после log-трансформации, p = {{ normality[1] }} </br>
+             {{fields[0]}} не распределена нормально, p = {{ normality[0] }}<br>
+             {{fields[0]}} распределена нормально после log-трансформации, p = {{ normality[1] }}<br>
          {% elif normality|length == 4: %}
-            <br> {{field1}} не распределена нормально, p = {{ normality[0] }} </br>
-            <br> {{field1}} не распределена нормально после log-трансформации, p = {{ normality[1] }} </br>
+             {{fields[0]}} не распределена нормально, p = {{ normality[0] }}<br>
+             {{fields[0]}} не распределена нормально после log-трансформации, p = {{ normality[1] }}<br>
             {% if normality[3]: %}
-               <br> {{field1}} распределена нормально после log-трансформации или уменьшения выборки до 100 значений, p = {{ normality[2] }} </br>
+                {{fields[0]}} распределена нормально после log-трансформации или уменьшения выборки до 100 значений, p = {{ normality[2] }}<br>
             {% else %}
-               <br> {{field1}} не распределена нормально после log-трансформации или уменьшения выборки до 100 значений, p = {{ normality[2] }} </br>
+                {{fields[0]}} не распределена нормально после log-трансформации или уменьшения выборки до 100 значений, p = {{ normality[2] }}<br>
             {% endif %}
          {% endif %}
       </p>
 
       <p>
-         {% if anova[0] > 0.05: %}
-            <br>ANOVA (F-тест односторонний): {{ anova[0] }}; p-value > 0.05 -> H0 принимается (выборки независимые) </br>
+         {% if anova['ANOVA F'] > 0.05: %}
+            ANOVA (F-тест односторонний): {{ anova['ANOVA F'] }}; p-value > 0.05, H0 принимается (выборки независимые)<br>
          {% else: %}
-            <br>ANOVA (F-тест односторонний): {{ anova[0] }}; p-value &lt; 0.05 -> H0 отклоняется (выборки зависимые) </br>
+            ANOVA (F-тест односторонний): {{ anova['ANOVA F'] }}; p-value &lt; 0.05, H0 отклоняется (выборки зависимые)<br>
          {% endif %}
 
-         {% if anova[1] > 0.05: %}
-            <br>Тест Левена: {{ anova[1] }}; p-value > 0.05 -> H0 принимается (модель гомоскедастична) </br>
+         {% if anova['heteroskedasticity'] > 0.05: %}
+            Тест Левена: {{ anova['heteroskedasticity'] }}; p-value > 0.05, H0 принимается (модель гомоскедастична)<br>
          {% else: %}
-            <br>Тест Левена: {{ anova[1] }}; p-value &lt; 0.05 -> H0 отклоняется (модель гетероскедастична) </br>
+            Тест Левена: {{ anova['heteroskedasticity'] }}; p-value &lt; 0.05, H0 отклоняется (модель гетероскедастична)<br>
          {% endif %}
 
-         {% if anova[2] > 3.5: %}
-            <br>Тест Дарбина-Уотсона: {{ anova[2] }} -> в модели обратная автокорреляция</br>
-         {% elif anova[2] < 0.5: %}
-            <br>Тест Дарбина-Уотсона: {{ anova[2] }} -> в модели автокорреляция</br>
-         {% elif 1.5 < anova[2] < 2.5: %}
-            <br>Тест Дарбина-Уотсона: {{ anova[2] }} -> в модели нет автокорреляции</br>
+         {% if anova['D-W'] > 3.5: %}
+            Тест Дарбина-Уотсона: {{ anova['D-W'] }}, в модели обратная автокорреляция<br>
+         {% elif anova['D-W'] < 0.5: %}
+            Тест Дарбина-Уотсона: {{ anova['D-W'] }}, в модели автокорреляция<br>
+         {% elif 1.5 < anova['D-W'] < 2.5: %}
+            Тест Дарбина-Уотсона: {{ anova['D-W'] }}, в модели нет автокорреляции<br>
          {% else: %}
-            <br>Тест Дарбина-Уотсона: {{ anova[2] }} -> результат неизвестен или неточен</br> 
+            Тест Дарбина-Уотсона: {{ anova['D-W'] }}, результат неизвестен или неточен<br> 
          {% endif %}
       </p>
 
+      <h2>Дополнительная информация</h2>
       <p>
-         Дополнительная информация (из ols.summary()):
          <table border="1" cellpadding="4">
-            {% for row in anova[3] %}
+            {% for row in anova['additional summary'] %}
                <tr>
                   {% for cell in row: %}
                      <td> {{ cell }} </td>
@@ -60,8 +63,9 @@
          </table>
       </p>
 
-      <form action = "http://localhost:5000/login">
-        <p> <input type = "submit" value = "Назад на главную" /> </p>
-     </form>
+      <form>
+         <input type="submit" value="Назад" formaction="http://localhost:2000/test" />
+         <input type="submit" value="На главную" formaction="http://localhost:2000/login" />
+      </form>
    </body>
 </html>
