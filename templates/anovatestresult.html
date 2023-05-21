@@ -27,10 +27,10 @@
       </p>
 
       <p>
-         {% if anova['ANOVA F'] > 0.05: %}
-            ANOVA (F-тест односторонний): {{ anova['ANOVA F'] }}; p-value > 0.05, H0 принимается (выборки независимые)<br>
+         {% if anova['anova_f'] > 0.05: %}
+            ANOVA (F-тест односторонний): {{ anova['anova_f'] }}; p-value > 0.05, H0 принимается (выборки независимые)<br>
          {% else: %}
-            ANOVA (F-тест односторонний): {{ anova['ANOVA F'] }}; p-value &lt; 0.05, H0 отклоняется (выборки зависимые)<br>
+            ANOVA (F-тест односторонний): {{ anova['anova_f'] }}; p-value &lt; 0.05, H0 отклоняется (выборки зависимые)<br>
          {% endif %}
 
          {% if anova['heteroskedasticity'] > 0.05: %}
@@ -39,21 +39,21 @@
             Тест Левена: {{ anova['heteroskedasticity'] }}; p-value &lt; 0.05, H0 отклоняется (модель гетероскедастична)<br>
          {% endif %}
 
-         {% if anova['D-W'] > 3.5: %}
-            Тест Дарбина-Уотсона: {{ anova['D-W'] }}, в модели обратная автокорреляция<br>
-         {% elif anova['D-W'] < 0.5: %}
-            Тест Дарбина-Уотсона: {{ anova['D-W'] }}, в модели автокорреляция<br>
-         {% elif 1.5 < anova['D-W'] < 2.5: %}
-            Тест Дарбина-Уотсона: {{ anova['D-W'] }}, в модели нет автокорреляции<br>
+         {% if anova['durbin_watson'] > 3.5: %}
+            Тест Дарбина-Уотсона: {{ anova['durbin_watson'] }}, в модели обратная автокорреляция<br>
+         {% elif anova['durbin_watson'] < 0.5: %}
+            Тест Дарбина-Уотсона: {{ anova['durbin_watson'] }}, в модели автокорреляция<br>
+         {% elif 1.5 < anova['durbin_watson'] < 2.5: %}
+            Тест Дарбина-Уотсона: {{ anova['durbin_watson'] }}, в модели нет автокорреляции<br>
          {% else: %}
-            Тест Дарбина-Уотсона: {{ anova['D-W'] }}, результат неизвестен или неточен<br> 
+            Тест Дарбина-Уотсона: {{ anova['durbin_watson'] }}, результат неизвестен или неточен<br> 
          {% endif %}
       </p>
 
       <h2>Дополнительная информация</h2>
       <p>
          <table border="1" cellpadding="4">
-            {% for row in anova['additional summary'] %}
+            {% for row in anova['additional_summary'] %}
                <tr>
                   {% for cell in row: %}
                      <td> {{ cell }} </td>

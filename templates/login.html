@@ -8,13 +8,13 @@
       <p>Flask-сервер для работы с данными опроса начинающих "кодеров". Данные находятся в БД PostgreSQL. Для анализа используются модули pandas, scipy, statsmodels.</p>
       <table>
          <tr>
-            {% for k in table.keys() %}
+            {% for k in display_table.keys() %}
             <th> {{ k }} </th>
             {% endfor %}
          </tr>
          {% for i in range(5) %}
             <tr class="hoverable">
-               {% for v in table.values() %}
+               {% for v in display_table.values() %}
                <td> {{ v[i] }} </td>
                {% endfor %}
             </tr>

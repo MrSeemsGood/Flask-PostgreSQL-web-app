@@ -1,92 +1,117 @@
-from flask import Flask, redirect, url_for, request, render_template
-from mystat import *
-import os
+import pandas as pd
+from flask import (
+    Flask,
+    redirect,
+    url_for,
+    request,
+    render_template,
+    session
+)
+from stat_work import (
+    connect_execute_db,
+    load_data,
+    create_tables,
+    do_contingency_test,
+    check_normality,
+    perform_anova
+)
 
-class MyApp(Flask):
-   def __init__(self, name, data):
-      super().__init__(name)
-      self.data = data
-      self.tables = ()
-      self.method = ""
-      self.corr_test = None
-      self.normality = False
-      self.anova = None
 
-app = MyApp(__name__, data=load_data())
+app = Flask(__name__)
 
-@app.route('/')
-def redirectToLogin():
-   return redirect(url_for('login'))
 
-# POST and GET are HTTP mehods.
-# GET - Sends data in unencrypted form to the server. Most common method.
-# POST - Used to send HTML form data to server. Data received by POST method is not cached by server.
-@app.route('/login')
+@app.route("/")
+def redirect_to_login():
+    return redirect(url_for("login"))
+
+
+@app.route("/login")
 def login():
-   return render_template('login.html', table=app.data.head().to_dict(orient='list'))
+    session.clear()
+    session['data_head'] = load_data().head().to_dict(orient='list')
+    return render_template(
+        "login.html",
+        display_table=session['data_head']
+        )
 
-@app.route('/insert')
-def insertValues():
-   return render_template('insert.html')
 
-@app.route('/test')
-def chooseTests():
-   return render_template('test.html', columnsList=app.data.columns)
+@app.route("/insert")
+def insert_values():
+    return render_template("insert.html")
 
-@app.route('/insertresult', methods = ['POST', 'GET'])
-def insertResult():
-   if request.method == 'POST':
-      result = dict(request.form)
-   else:
-      result = dict(request.args)
 
-   app.data = pd.concat((app.data, pd.DataFrame(result, index=[0])))
-   result_db = ','.join(["'" + str(item) + "'" for item in tuple(result.values())])
-   connect_execute_db('INSERT INTO flaskdb VALUES (' + result_db + ')')
-   return render_template('insertresult.html', result=result)
+@app.route("/test")
+def select_tests():
+    try:
+        return render_template(
+            "test.html",
+            columns_list=pd.DataFrame(session['data_head']).columns
+            )
+    except KeyError:
+        return redirect(url_for("login"))
 
-@app.route('/testresult', methods=['POST'])
-def testResult():
-   fields = list(dict(request.form).values())
 
-   # таблицы сопряженности и ожидаемых значений
-   try:
-      app.tables = create_tables(app.data, fields[0], fields[1])
-      app.method = choose_method(app.data, fields[0], fields[1])
-      app.corr_test = perform_test(
-         pd.crosstab(app.data[fields[0]], app.data[fields[1]], margins=True),
-         app.method
-      )
-   except KeyError:
-      return render_template('errorpage.html')
-   
-   return render_template(
-         'testresult.html',
-         fields=fields,
-         linkage = app.tables['linkage'],
-         expected=app.tables['expected'],
-         method=app.method,
-         F=app.corr_test['F'],
-         p=app.corr_test['p'],
-         result=app.corr_test['result']
-      )
+@app.route("/insertresult", methods=["POST", "GET"])
+def insert_result():
+    if request.method == "POST":
+        result = dict(request.form)
+    else:
+        result = dict(request.args)
 
-@app.route('/anovatestresult', methods=['POST'])
-def anovaTestResult():
-   fields = list(dict(request.form).values())
+    connect_execute_db("""
+        INSERT INTO flaskdb VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+        args=tuple(result.values())
+        )
 
-   try:
-      app.normality = check_normality(app.data[fields[0]])
-      app.anova = do_anova(app.data, fields[0], fields[1])
-   except:
-      return render_template('errorpage.html')
-      
-   return render_template(
-      'anovatestresult.html',
-      fields=fields,
-      normality = app.normality,
-      anova = app.anova
-   )
+    return render_template(
+        "insertresult.html",
+        )
 
-if __name__ == '__main__':
-   app.run(debug=True, port=2000)
+
+@app.route("/testresult", methods=["POST"])
+def test_result():
+    fields = list(dict(request.form).values())
+    data = load_data()
+
+    try:
+        contingency = create_tables(data, fields[0], fields[1])
+        contingency_test = do_contingency_test(
+            pd.crosstab(
+                data[fields[0]], data[fields[1]], margins=True
+                )
+        )
+    except KeyError:
+        return render_template("errorpage.html")
+
+    return render_template(
+        "testresult.html",
+        fields=fields,
+        linkage=contingency["real_linkage"],
+        expected=contingency["expected_linkage"],
+        F=contingency_test["f"],
+        p=contingency_test["p"]
+    )
+
+
+@app.route("/anovatestresult", methods=["POST"])
+def anova_test_result():
+    fields = list(dict(request.form).values())
+    data = load_data()
+
+    try:
+        normality = check_normality(data[fields[0]])
+        anova = perform_anova(data, fields[0], fields[1])
+    except KeyError:
+        return render_template("errorpage.html")
+
+    return render_template(
+        "anovatestresult.html",
+        fields=fields,
+        normality=normality,
+        anova=anova
+    )
+
+
+if __name__ == "__main__":
+    app.config['SECRET_KEY'] = 'ThisIsSecretSecretSecret'
+    app.run(port=2000)

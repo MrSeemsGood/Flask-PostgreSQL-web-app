@@ -9,14 +9,14 @@
          <p>
             <label for="column1">Название первого столбца (зависимая переменная):</label>
             <select id="column1" name="column1">
-               {% for c in columnsList: %}
+               {% for c in columns_list: %}
                   <option value={{ c }}>{{ c }}</option>
                {% endfor %}
             </select><br>
 
             <label for="column2">Название первого столбца (независимая переменная):</label>
             <select id="column2" name="column2">
-               {% for c in columnsList: %}
+               {% for c in columns_list: %}
                   <option value={{ c }}>{{ c }}</option>
                {% endfor %}
             </select><br>
